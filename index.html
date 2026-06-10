@@ -41,9 +41,16 @@
 <script>
 function generateLink() {
     const channelId = document.getElementById('channelSelect').value;
-    const targetUrl = "https://tv.roarzone.net/";
+    
+    // মূল ইউআরএল এর আগে একটি ফ্রি CORS Proxy যোগ করা হলো
+    const targetUrl = "https://cors-anywhere.herokuapp.com/https://tv.roarzone.net/";
+    
+    // অল্টারনেটিভ প্রক্সি (যদি উপরেরটা জ্যাম থাকে): 
+    // const targetUrl = "https://api.allorigins.win/raw?url=" + encodeURIComponent("https://tv.roarzone.net/");
 
-    // ফ্রন্টএন্ড থেকে টোকেন স্ক্র্যাপ করার জন্য fetch ব্যবহার করা
+    document.getElementById('streamUrl').value = "লোডিং... দয়া করে অপেক্ষা করুন...";
+    document.getElementById('outputBox').style.display = 'block';
+
     fetch(targetUrl)
         .then(response => response.text())
         .then(html => {
@@ -54,15 +61,15 @@ function generateLink() {
             if (token) {
                 const finalUrl = `https://edge2.roarzone.net:8447/roarzone/${channelId}/tracks-v1a1/mono.m3u8?token=${token}`;
                 document.getElementById('streamUrl').value = finalUrl;
-                document.getElementById('outputBox').style.display = 'block';
             } else {
-                alert("দুঃখিত, টোকেন পাওয়া যায়নি! দয়া করে ব্রাউজারের Network Tab পদ্ধতি ব্যবহার করুন।");
+                alert("দুঃখিত, টোকেন পাওয়া যায়নি! মূল সাইটের ফরম্যাট পরিবর্তন হতে পারে।");
+                document.getElementById('outputBox').style.display = 'none';
             }
         })
         .catch(err => {
-            // CORS ব্লকের কারণে ফ্রন্টএন্ডে এরর আসতে পারে
-            alert("CORS রেস্ট্রিকশনের কারণে ব্রাউজার সরাসরি ডেটা রিড করতে দিচ্ছে না।");
+            alert("প্রক্সি সার্ভারে সমস্যা হচ্ছে বা রিকোয়েস্ট ব্লক হয়েছে।");
             console.error(err);
+            document.getElementById('outputBox').style.display = 'none';
         });
 }
 </script>
