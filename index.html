@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Live TV Player</title>
+    <style>
+        body { font-family: Arial, sans-serif; background-color: #121212; color: #ffffff; text-align: center; padding: 30px; }
+        .container { max-width: 600px; margin: 0 auto; background: #1e1e1e; padding: 25px; border-radius: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.5); }
+        h2 { color: #4CAF50; }
+        select, button { padding: 10px 20px; font-size: 16px; margin: 10px; border-radius: 5px; border: none; }
+        select { background: #333; color: #fff; width: 80%; }
+        button { background: #4CAF50; color: white; font-weight: bold; cursor: pointer; }
+        button:hover { background: #45a049; }
+        .output-box { margin-top: 20px; display: none; }
+        textarea { width: 100%; height: 70px; background: #2d2d2d; color: #fff; padding: 10px; border-radius: 5px; border: 1px solid #444; resize: none; box-sizing: border-box; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>লাইভ টিভি লিঙ্ক জেনারেটর</h2>
+    <p>চ্যানেল নির্বাচন করুন:</p>
+    
+    <select id="channelSelect">
+        <option value="edge1/1">T Sports HD</option>
+        <option value="edge1/2">Somoy TV</option>
+        <option value="edge3/zee_bangla_cinema">Zee Bangla Cinema</option>
+        <option value="edge1/3">BTV</option>
+    </select>
+    
+    <br>
+    <button onclick="generateLink()">লিঙ্ক জেনারেট করুন</button>
+
+    <div class="output-box" id="outputBox">
+        <p>আপনার লাইভ স্ট্রিমিং লিঙ্ক:</p>
+        <textarea id="streamUrl" readonly onclick="this.select()"></textarea>
+    </div>
+</div>
+
+<script>
+function generateLink() {
+    const channelId = document.getElementById('channelSelect').value;
+    const targetUrl = "https://tv.roarzone.net/";
+
+    // ফ্রন্টএন্ড থেকে টোকেন স্ক্র্যাপ করার জন্য fetch ব্যবহার করা
+    fetch(targetUrl)
+        .then(response => response.text())
+        .then(html => {
+            // রেগুলার এক্সপ্রেশন দিয়ে টোকেন খোঁজা
+            const match = html.match(/token=["']?([a-zA-Z0-9\-_\.]+)/);
+            const token = match ? match[1] : '';
+
+            if (token) {
+                const finalUrl = `https://edge2.roarzone.net:8447/roarzone/${channelId}/tracks-v1a1/mono.m3u8?token=${token}`;
+                document.getElementById('streamUrl').value = finalUrl;
+                document.getElementById('outputBox').style.display = 'block';
+            } else {
+                alert("দুঃখিত, টোকেন পাওয়া যায়নি! দয়া করে ব্রাউজারের Network Tab পদ্ধতি ব্যবহার করুন।");
+            }
+        })
+        .catch(err => {
+            // CORS ব্লকের কারণে ফ্রন্টএন্ডে এরর আসতে পারে
+            alert("CORS রেস্ট্রিকশনের কারণে ব্রাউজার সরাসরি ডেটা রিড করতে দিচ্ছে না।");
+            console.error(err);
+        });
+}
+</script>
+
+</body>
+</html>
